@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.mobinno.haribol.utilities.NetworkUtils;
 
+import java.io.IOException;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
@@ -48,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * makeGithubSearchQuery() will perform the following tasks:
      * 1. Create the URL to query the github server
-     * 2. --- (to be added)
+     * 2. Query the github server using the Created URL.
      */
     public void makeGithubSearchQuery() {
 
@@ -60,6 +61,19 @@ public class MainActivity extends AppCompatActivity {
 
         // Display the Final URL on TextView
         mUrlDisplayTextView.setText(githubSearchUrl.toString());
+
+        String githubSearchResults = null;
+
+        /**
+         * Call getResponseFromHttpUrl and display the results in mSearchResultsTextView
+         * Surround the call to getResponseFromHttpUrl with a try / catch block to catch an IOException
+          */
+        try {
+            githubSearchResults = NetworkUtils.getResponseFromHttpUrl(githubSearchUrl);
+            mSearchResultsTextView.setText(githubSearchResults);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 
