@@ -1,5 +1,6 @@
 package com.mobinno.haribol;
 
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,7 +18,6 @@ public class MainActivity extends AppCompatActivity {
     private EditText mSearchBoxEditText;
     private TextView mUrlDisplayTextView;
     private TextView mSearchResultsTextView;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +48,9 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * makeGithubSearchQuery() will perform the following tasks:
-     * 1. Create the URL to query the github server
-     * 2. Query the github server using the Created URL.
+     * 1. Create and Display the Query URL.
+     * 2. Query the github server over HTTP using the Created URL.
+     * 3. Display the Query result in the TextView.
      */
     public void makeGithubSearchQuery() {
 
@@ -62,17 +63,35 @@ public class MainActivity extends AppCompatActivity {
         // Display the Final URL on TextView
         mUrlDisplayTextView.setText(githubSearchUrl.toString());
 
-        String githubSearchResults = null;
+        // Creating a new GithubQueryTask and calling its execute method, passing in the url to query
+       new GithubQueryTask().execute(githubSearchUrl);
+    }
 
-        /**
-         * Call getResponseFromHttpUrl and display the results in mSearchResultsTextView
-         * Surround the call to getResponseFromHttpUrl with a try / catch block to catch an IOException
-          */
-        try {
-            githubSearchResults = NetworkUtils.getResponseFromHttpUrl(githubSearchUrl);
-            mSearchResultsTextView.setText(githubSearchResults);
-        } catch (IOException e) {
-            e.printStackTrace();
+    // Creating a 'GithubQueryTask' class that extends AsyncTask
+    public class GithubQueryTask extends AsyncTask<URL, Void, String> {
+
+        // Overriding the 'doInBackground' method to Query the github server and return the results.
+        @Override
+        protected String doInBackground(URL... params) {
+
+            URL searchUrl = params[0];
+            String githubSearchResults = null;
+
+            // Call getResponseFromHttpUrl inside a try / catch block to catch an IOException
+            try {
+                githubSearchResults = NetworkUtils.getResponseFromHttpUrl(searchUrl);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return githubSearchResults;
+        }
+
+        // Overriding 'onPostExecute' to display the results in the TextView
+        @Override
+        protected void onPostExecute(String githubSearchResults) {
+            if(githubSearchResults != null && !githubSearchResults.equals("")) {
+                mSearchResultsTextView.setText(githubSearchResults);
+            }
         }
     }
 }
